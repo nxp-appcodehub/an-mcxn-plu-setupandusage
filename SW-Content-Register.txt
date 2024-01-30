@@ -1,0 +1,9 @@
+Package:                   an-mcxn-plu-setupandusage
+
+Version:                   1.0.0
+Outgoing License:          BSD-3-clause
+License File:              License.txt
+Description and comments:  PLU peripheral sample applications
+Release Location:          https://github.com/nxp-appcodehub/an-mcxn-plu-setupandusage
+Origin:                    NXP (BSD-3-Clause)
+                           cmsis - ARM (Apache-2.0) - https://github.com/ARM-software/CMSIS_5/

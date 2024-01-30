@@ -1,0 +1,23 @@
+<data:item xmlns:data="data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="data ../../xsd/alp.xsd" id="an-mcxn-plu-setupandusage" type="app_note" format="projectfile" versionSchema="1.0.0" name="mcxn-plu-setupandusage">
+    <display_title>
+        MCX N PLU setup and usage
+    </display_title>
+    <overview>
+        <![CDATA[This application note explains the elements that compose the PLU module and how to integrate them to achieve logic networks, as well as providing examples of combinational, sequential and wakeup circuits.]]>
+    </overview>
+    <toolchains>
+        <toolchain name="mcux"></toolchain>
+    </toolchains>
+    <families>
+        <family name="mcx"></family>
+    </families>
+    <nxp_compatible_hw>
+        <hw id="FRDM-MCXN947"></hw>
+    </nxp_compatible_hw>
+    <peripherals>
+        <peripheral name="plu"></peripheral>
+    </peripherals>
+    <categories>
+        <category name="low_power"></category>
+    </categories>
+</data:item>
