@@ -1,11 +1,10 @@
 # MCX N PLU setup and usage
-[<img src="https://mcuxpresso.nxp.com/static/icon/nxp-logo-color.svg" width="100"/>](https://www.nxp.com)
 
 **Board:** [FRDM-MCXN947](nxp.com/FRDM-MCXN947) <br>
 **Categories:** Low Power <br>
-**Peripherals:** PLU <br>
 **Toolchains:** MCUXpresso IDE <br>
 **SDK:** 2.14.0 <br>
+**Peripherals:** PLU <br>
 
 ---
 
@@ -25,8 +24,12 @@
         2. [Adjustments](#step5-2-2)
     3. [Wakeup Interrupt Example](#step5-3)
     4. [Sequential Logic Example](#step5-4)
-6. [Conclusion](#step6)
-7. [Release Notes](#step7)
+6. [ConfigTools enablement](#step6)
+    1. [Set Up](#step6-1)
+    2. [Using the "Schematic – logic gates" mode](#step6-2)
+    3. [Using the “Schematic – direct LUT” mode](#step6-3)
+    4. [Using the “Verilog file and Verilog text” modes](#step6-4)
+7. [Conclusion](#step7)
 
 ---
 
@@ -44,7 +47,7 @@ The MCX N has a Programmable Logic Unit (PLU) capable of creating combinational 
 
 ### Functional Description <a name="step2"></a>
 
-This application note will first explain the elements that compose the PLU module, as well as how to integrate them to achieve simple logic networks. Lastly, it will demonstrate the setup and use of this module with three example codes; A 1-bit 4 to 1 demultiplexer, a 4-bit shifter and a low power implementation of the 4 to 1 demultiplexer to exemplify its wakeup capabilities.
+This application note will first explain the elements that compose the PLU module, as well as how to integrate them to achieve simple logic networks. Lastly, it will demonstrate the setup and use of this module with three example codes; A 1-bit 1 to 4 demultiplexer, a 4-bit shifter and a low power implementation of the 1 to 4 demultiplexer to exemplify its wakeup capabilities.
 
 ### Module Architecture <a name="step3"></a>
 
@@ -386,7 +389,155 @@ If the clock signal stops generating positive edges, the flip flops will not upd
 
 The transitions for this case were 0000 → 0001 → 0011 → 0110 → 1100 → 1000 → 0000 as the input remained high for two clock cycles. However, the transition from 0011 → 0110 was halted until the next positive edge of the clock cycle. During the halt, the value ‘0011’ was stored on the flip flops for approximately 10 seconds before resuming the shifting process.
 
-### Conclusion <a name="step6"></a>
+### ConfigTools enablement <a name="#step6"></a>
+
+#### Set Up <a name="#step6-1"></a>
+
+The PLU is fully integrated with ConfigTools, allowing for a friendlier and method of setting up the PLU’s elements by using a digital schematic based interface, or even Verilog files. To use this, first enable the “Peripherals” Tool on Config Tools Overview window by turning on its respective toggle switch, and then open the tool by  clicking on the Peripherals icon:
+
+<img src="./images/peripherals.png" width="800"/>
+
+Then, on the Peripherals panel on the left hand side, search for “plu” and add enable it by clicking on the check mark box:
+
+<img src="./images/plu0_peripheral.png" width="00"/>
+
+The PLU peripheral configuration will now be ready to use. By default, the general configuration will include the configurations of all of the aforementioned elements:
+
+<img src="./images/plu_config.png" width="800"/>
+
+From top to bottom, it shows:
+1.	Configuration Mode, which allows for different methods of configuring the PLU's elements.
+2.	Resources, which allow to configure inputs, outputs and LUTs (LUTs are available to configure here when using the “Show all resources settings (advanced)” option).
+3.	Flip-flop external clock configuration.
+4.	Interrupt configuration, including latch and glitch filters.
+
+The PLU's elements, including inputs, outputs, LUTs, Flip-Flops and Interruts have all been explaned in this document, so the remainder of this chapter will focus on the configuration modes for the PLU on ConfigTools.
+
+#### Using the "Schematic – logic gates" mode <a name="#step6-2"></a>
+
+The default configuration mode will be “Schematic – logic gates” which is the simplest method of setting up the PLU as it allows for a schematic configuration of the module using a set of predefined logic gates.
+
+By clicking on the “Open schematic view” button, a blank canvas will appear with buttons for each of the basic logic gates:
+
+<img src="./images/canvas.png" width="500"/>
+
+This canvas allows to easily create digital circuit schematics based on the fundamental logic gates. This mode allows for a much easier recreation all of the basic logic gates as seen on section “5.1 Basic Logic Gates” of this document, but now with an intuitive drag and drop schematic interface. We can simply add two inputs, one output and the logic gate, and click on the terminals of each to wire them correspondingly:
+
+AND Gate:
+
+<img src="./images/AND.png"/>
+
+OR Gate:
+
+<img src="./images/OR.png"/>
+
+XOR Gate:
+
+<img src="./images/XOR.png"/>
+
+NAND Gate:
+
+<img src="./images/NAND.png"/>
+
+NOR Gate:
+
+<img src="./images/NOR.png"/>
+
+NXOR Gate:
+
+<img src="./images/NXOR.png"/>
+
+NOT Gate:
+
+<img src="./images/NOT.png"/>
+
+Buffer Gate:
+
+<img src="./images/BUFF.png"/>
+
+Multiplexer. (Even though not technically a basic logic gate, this mode also has a preset for a multiplexer):
+
+<img src="./images/MUX.png"/>
+
+After wiring all of the inputs, outputs and gates, all that is left is to click on the “Optimize & apply” button and the tool will automatically translate the drawn schematic to the register definitions to be used by the PLU.
+
+<img src="./images/optimize&apply.png"/>
+
+The translation to of the circuit to the appropriate MUX and LUT values will then be set, and can be corroborated on the “Registers” window, which will show the new changes highlighted in yellow. For the case of the previous AND gate circuit, this would be the resulting changes:
+
+<img src="./images/schematic_registers.png"/>
+
+Note: The “Optimize & apply” function will also automatically Save and Lock the current schematic. If further modifications are required later, the first step includes unlocking the schematic with the “Unlock button”.
+
+Also, by clicking on the timing information button of the top menu bar, timings for all of the PLU related signals will be shown for consideration of the user. These would be the AND gate’s timings:
+
+<img src="./images/timings.png"/>
+
+#### Using the “Schematic – direct LUT” mode <a name="#step6-3"></a>
+
+The “Schematic – direct LUT” mode is similar to the previous mode as it is also based on a schematic drawing of the logic network. However, instead of providing predefined logic gates like in the previous mode, it shows the actual PLU elements described on section “3. Module Architecture”, these being: Inputs, Outputs, Look Up Tables and Flip-Flops. The fact that one can manually set a custom LUT on the schematic layout itself results in a configuration mode that is more direct to the actual configuration of the PLU, and therefore can be useful to create more complex or custom logic elements. For example, this mode is useful to create the 1 to 4 Demultiplexer previously elaborated in section “5.2 Combinational Logic Example” of this document. The result would be as follows:
+
+<img src="./images/lut_demux.png"/>
+
+The connections of the LUT tables are labeled with capital letters in this mode, where connection A corresponds to input 0, connection B to input 1, connection C to input 2, and so on. The actual table for each element is displayed with all possible combinations of the set inputs of the LUT element. The user can then set to ‘1’ or ‘0’ the output of each of the combination, by clocking on the output column of the table. For the case of the demultiplexer, the truth tables would be set as follows (with input A as SEL_0, input B as SEL_1, input C as DATA):
+
+LUT0 truth table:
+
+<img src="./images/LUT0.png"/>
+
+LUT1 truth table:
+
+<img src="./images/LUT1.png"/>
+
+LUT2 truth table:
+
+<img src="./images/LUT2.png"/>
+
+LUT3 truth table:
+
+<img src="./images/LUT3.png"/>
+
+It is also worth noting that setting custom Look Up Tables is not the only way to set each LUT element. By using the “Type” drop down menu on the right of the canvas, the user can select between Custom LUT a predefined set of basic logic gates, a logic expression and a CSV file description of the logic. The “Custom” type is the default method, which allows for modification of each output individually by toggling these between ‘1’ or ‘0’. The predefined logic gates are similar to the ones seen on the “Schematic – logic gates” mode, but with the advantage of being able to increase the number of inputs of each logic gate by up to 5 inputs. In the case of MUX, 3 inputs and for Buffer and NOT gates, only 1 input:
+
+<img src="./images/LUT_gates.png"/>
+
+When selecting the “logic expression” type, a dialog window will appear, where the user can input the desired logic description in a text based manner, as such:
+
+<img src="./images/logic_expression.png" width="800"/>
+
+For this case, the resulting LUT assignments would be as follows:
+
+<img src="./images/expression_truthtable.png"/>
+
+Finally, the last type of LUT setup is with the “Import CSV” method, which allows configuration of a LUT using Comma-Separated Value files. This file does require a specific format, which is as follows:
+
+<img src="./images/csv.png" width="300"/>
+
+Note that the number of inputs has to be defined at the beginning of the file, before the rest of the truth table is described. Also worth noting is the fact that the order of inputs on this file is arranged as LSB first, while in the IDE the arrangment is MSB first. The resulting LUT in ConfigTools would be as follows:
+
+<img src="./images/csv_truthtable.png"/>
+
+It is also worth noting that not all outputs have to be explicitly written down, only the ones resulting in a ‘1’ output. In other words, the previous table could also be reduced to the following csv file:
+
+|   |   |   |   |
+|---|---|---|---|
+| 0 |   |   |   |
+| 3 |   |   |   |
+| 0 | 0 | 1 | 1 |
+
+
+#### Using the “Verilog file and Verilog text” modes <a name="#step6-4"></a>
+The final two modes allows the use of Verilog syntax to generate the logic network. These two modes are very similar between one another, the only difference being if the Verilog code will be imported as a file or it will be manually inputted to ConfigTools. Following the previous 1 to 4 demultiplexer example, this same logic network can be achieved by using the following Verilog code:
+
+<img src="./images/verilog.png"/>
+
+After clicking on the “Apply Verilog configuration” button, a prompt will appear to select the routing options for each of the used inputs and outputs:
+
+<img src="./images/pin_mapping.png"/>
+
+Once mapped, ConfigTools will translate the Verilog code into the necessary register definition for the PLU module to have the same behavior.
+
+### Conclusion <a name="step7"></a>
 
 The PLU module of the MCX N is modest when it comes to the complexity of the inner components as it is only made up from a series of look-up tables, multiplexers and flip flops. In spite of that, more elaborate and powerful logic networks can be achieved from those basic elements, providing on-chip solutions to many essential digital circuits and avoiding the need of external components for these digital applications. Not only that, but its interruption and wake up capabilities also enable the PLU to be a simple but effective addition to many low power applications. The PLU’s flexibility and built-in features enable this module to be a very effective addition to the MCX N series of MCUs that should not be overlooked.
 
@@ -414,8 +565,7 @@ Questions regarding the content/correctness of this example can be entered as Is
 [![Follow us on Facebook](https://img.shields.io/badge/Facebook-Follow%20us%20on%20Facebook-blue.svg)](https://www.facebook.com/nxpsemi/)
 [![Follow us on Twitter](https://img.shields.io/badge/Twitter-Follow%20us%20on%20Twitter-white.svg)](https://twitter.com/NXP)
 
-## Release Notes<a name="step7"></a>
+## 7. Release Notes<a name="step7"></a>
 | Version | Description / Update                           | Date                        |
 |:-------:|------------------------------------------------|----------------------------:|
-| 1.0     | Initial release on Application Code Hub        | January 29<sup>th</sup> 2024 |
-
+| 1.0     | Initial release on Application Code Hub        | January 4<sup>th</sup> 2024 |
